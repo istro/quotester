@@ -1,0 +1,6 @@
+= form_for @group do |f|
+  = f.text_field :name, class: 'large-4 columns', placeholder: @group.name
+  = f.check_box :active, class: 'inline', value: @group.active
+  = f.label 'Active'
+  %br
+  = f.submit 'Update', class: 'button radius success'

@@ -1,6 +1,13 @@
-%h1 Quote groups
+%h3 Quote groups
 
-.button Create
+%ul
+- @groups.each do |g|
+  %li{ class: (g.active ? 'green' : 'red') }
+    = link_to g.name, g
+    |
+    = link_to 'edit', edit_group_url(g), class: 'smaller'
+    |
+    = link_to 'delete', g, method: :delete, class: 'smaller'
 
-%p list quote groups with edit/delete buttons
-
+%br
+= link_to 'New group', '/groups/new', class: 'button radius'
