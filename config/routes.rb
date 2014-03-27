@@ -1,4 +1,14 @@
 Quotester::Application.routes.draw do
+
+  resources :groups do
+    resources :quotes
+  end
+
+  scope '/api' do
+    get :any_active, controller: 'random'
+    get :group_active, controller: 'random'
+  end
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
