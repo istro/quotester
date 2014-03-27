@@ -1,5 +1,7 @@
 Quotester::Application.routes.draw do
 
+  root to: 'groups#index'
+
   resources :groups do
     resources :quotes
   end

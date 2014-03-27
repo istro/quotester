@@ -4,7 +4,7 @@ gem 'rails', '4.0.2'
 gem 'pg'
 gem 'thin'
 gem 'haml-rails'
-gem 'foundation'
+gem 'foundation-rails'
 gem 'heroku'
 
 # Use SCSS for stylesheets
