@@ -5,9 +5,7 @@ class GroupsController < ApplicationController
   end
 
   def create
-    group = Group.new group_params
-
-    if group.save
+    if Group.create group_params
       redirect_to :groups
     else
       render :new
@@ -19,6 +17,7 @@ class GroupsController < ApplicationController
   end
 
   def show
+    redirect_to controller: 'quotes', action: 'index', group_id: params[:id]
   end
 
   def edit

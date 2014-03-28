@@ -1,2 +1,11 @@
-%h1 Quotes#index
-%p Find me in app/views/quotes/index.html.haml
+%h3 Quotes in #{@group.name} group | #{link_to 'All groups', groups_path}
+
+%ul
+- @quotes.each do |q|
+  %li
+    = link_to q.text, edit_group_quote_path(@group.id, q.id)
+    |
+    = link_to 'delete', group_quote_path(@group.id, q.id), method: :delete, class: 'smaller'
+
+%br
+= link_to 'Add quote', new_group_quote_path(@group), class: 'button radius'

@@ -5,9 +5,9 @@
   %li{ class: (g.active ? 'green' : 'red') }
     = link_to g.name, g
     |
-    = link_to 'edit', edit_group_url(g), class: 'smaller'
+    = link_to 'edit', edit_group_path(g), class: 'smaller'
     |
     = link_to 'delete', g, method: :delete, class: 'smaller'
 
 %br
-= link_to 'New group', '/groups/new', class: 'button radius'
+= link_to 'New group', new_group_path, class: 'button radius'
