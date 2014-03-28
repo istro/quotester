@@ -1,13 +1,29 @@
-%h3 Quote groups
+.api
+  %h3 Api usage
 
-%ul
-- @groups.each do |g|
-  %li{ class: (g.active ? 'green' : 'red') }
-    = link_to g.name, g
-    |
-    = link_to 'edit', edit_group_path(g), class: 'smaller'
-    |
-    = link_to 'delete', g, method: :delete, class: 'smaller'
+  %p
+    `GET /api/any_active`  will give you a random quote from all active groups.
+    %br
+    `GET /api/group_random?name=group_name`  will give you a random quote from a `group_name` group.
 
-%br
-= link_to 'New group', new_group_path, class: 'button radius'
+.legend
+  %h3 Legend
+
+  %span.green Green groups are active (random quote from any of these groups are served)
+  %br
+  %span.red Red groups are inactive (a quote from that group can be retreived only explicitly)
+
+.groups
+  %h2 Quote groups
+
+  %ul
+  - @groups.each do |g|
+    %li{ class: (g.active ? 'green' : 'red') }
+      = link_to g.name, g
+      |
+      = link_to 'edit', edit_group_path(g), class: 'smaller'
+      |
+      = link_to 'delete', g, method: :delete, class: 'smaller'
+
+  %br
+  = link_to 'New group', new_group_path, class: 'button radius'

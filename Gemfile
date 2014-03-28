@@ -23,3 +23,8 @@ group :development, :test do
   gem 'binding_of_caller'
   gem 'jazz_hands'
 end
+
+# heroku ?
+# for some reason errored out when I put them in :production group. oh well
+gem 'rails_12factor'
+gem 'sprockets_better_errors'

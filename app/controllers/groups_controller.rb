@@ -13,7 +13,7 @@ class GroupsController < ApplicationController
   end
 
   def index
-    @groups = Group.find :all, order: 'id'
+    @groups = Group.find :all, order: 'created_at ASC'
   end
 
   def show
