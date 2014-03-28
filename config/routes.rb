@@ -8,7 +8,7 @@ Quotester::Application.routes.draw do
 
   scope '/api' do
     get :any_active, controller: 'random'
-    get :group_active, controller: 'random'
+    get :group_random, controller: 'random'
   end
 
   # The priority is based upon order of creation: first created -> highest priority.
