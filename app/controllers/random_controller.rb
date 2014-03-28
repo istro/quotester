@@ -1,4 +1,6 @@
 class RandomController < ApplicationController
+  skip_before_action :authenticate_user!
+
   def any_active
     active_groups = Group.find_all_by_active true
     all_quotes = []
