@@ -10,6 +10,7 @@ gem 'uglifier', '>= 1.3.0'
 # ops
 gem 'pg'
 gem 'thin'
+gem 'devise'
 
 # markup/styling
 gem 'haml-rails'
