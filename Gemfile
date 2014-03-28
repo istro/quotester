@@ -17,6 +17,8 @@ gem 'haml-rails'
 gem 'sass-rails', '~> 4.0.0'
 gem 'foundation-rails'
 
+# monitoring (actually to ping heroku and prevent it from idling)
+gem 'newrelic_rpm'
 
 group :development, :test do
   # debugging
