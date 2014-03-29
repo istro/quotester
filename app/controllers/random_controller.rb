@@ -8,8 +8,8 @@ class RandomController < ApplicationController
     all_quotes = []
     active_groups.each{ |group| all_quotes.push group.quotes.load }
     all_quotes.flatten!
-    response = { advice: all_quotes.sample.text }
-    render json: response
+    response = { advice: all_quotes.sample.text }.to_json
+    render json: response,  status: 200, callback: params[:callback]
   end
 
   def group_random
@@ -17,15 +17,15 @@ class RandomController < ApplicationController
       group = Group.where('name ILIKE ?', params[:name]).first
       if group.nil?
         response = { error: "error: group '#{params[:name]}' not found" }
-        render json: response
+        render json: response, status: 422, callback: params[:callback]
       else
         # could also check to make sure there's at least one quote in the group... but whatevs
         response = { advice: group.quotes.sample.text }
-        render json: response, status: 200
+        render json: response, status: 200, callback: params[:callback]
       end
     else
       response = { error: 'error: please provide a group name in params' }
-      render json: response, status: 422
+      render json: response, status: 422, callback: params[:callback]
     end
   end
 end
