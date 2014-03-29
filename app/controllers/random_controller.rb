@@ -1,25 +1,31 @@
 class RandomController < ApplicationController
   skip_before_action :authenticate_user!
 
+  respond_to :json
+
   def any_active
-    active_groups = Group.find_all_by_active true
+    active_groups = Group.where(active: true).to_a
     all_quotes = []
-    active_groups.each{ |group| all_quotes.push group.quotes.all }
+    active_groups.each{ |group| all_quotes.push group.quotes.load }
     all_quotes.flatten!
-    render json: all_quotes.sample.text, status: 200
+    response = { advice: all_quotes.sample.text }
+    render json: response
   end
 
   def group_random
     if params[:name]
       group = Group.where('name ILIKE ?', params[:name]).first
       if group.nil?
-        render json: "error: group '#{params[:name]}' not found", status: 404
+        response = { error: "error: group '#{params[:name]}' not found" }
+        render json: response
       else
         # could also check to make sure there's at least one quote in the group... but whatevs
-        render json: group.quotes.sample.text, status: 200
+        response = { advice: group.quotes.sample.text }
+        render json: response, status: 200
       end
     else
-      render json: 'error: please provide a group name in params', status: 422
+      response = { error: 'error: please provide a group name in params' }
+      render json: response, status: 422
     end
   end
 end
