@@ -3,6 +3,17 @@ class RandomController < ApplicationController
 
   respond_to :json
 
+  def get_praise
+    # costumize for specific users.
+    # todo: bring that out into UI
+    if params[:name].casecmp('marekjanicki') == 0
+      params[:group_name] = 'stern'
+      group_random
+    else
+      any_active
+    end
+  end
+
   def any_active
     active_groups = Group.where(active: true).to_a
     all_quotes = []
@@ -13,19 +24,20 @@ class RandomController < ApplicationController
   end
 
   def group_random
-    if params[:name]
-      group = Group.where('name ILIKE ?', params[:name]).first
+    if params[:group_name]
+      group = Group.where('name ILIKE ?', params[:group_name]).first
       if group.nil?
-        response = { error: "error: group '#{params[:name]}' not found" }
-        render json: response, status: 422, callback: params[:callback]
+        any_active
       else
-        # could also check to make sure there's at least one quote in the group... but whatevs
-        response = { advice: group.quotes.sample.text }
-        render json: response, status: 200, callback: params[:callback]
+        if group.quotes.length > 0
+          response = { advice: group.quotes.sample.text }
+          render json: response, status: 200, callback: params[:callback]
+        else
+          any_active
+        end
       end
     else
-      response = { error: 'error: please provide a group name in params' }
-      render json: response, status: 422, callback: params[:callback]
+      any_active
     end
   end
 end

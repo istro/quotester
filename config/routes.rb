@@ -8,6 +8,7 @@ Quotester::Application.routes.draw do
   end
 
   scope '/api' do
+    get :get_praise, controller: 'random'
     get :any_active, controller: 'random'
     get :group_random, controller: 'random'
   end

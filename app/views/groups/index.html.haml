@@ -4,12 +4,12 @@
   %p
     `GET /api/any_active`  will give you a random quote from all active groups.
     %br
-    `GET /api/group_random?name=group_name`  will give you a random quote from a `group_name` group.
+    `GET /api/group_random?group_name=group_name`  will give you a random quote from a `group_name` group.
 
 .legend
   %h3 Legend
 
-  %span.green Green groups are active (random quote from any of these groups are served)
+  %span.green Green groups are active (random quote from any of these groups is served)
   %br
   %span.red Red groups are inactive (a quote from that group can be retreived only explicitly)
 
