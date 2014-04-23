@@ -1,4 +1,6 @@
 class QuotesController < ApplicationController
+  before_action :authenticate_user!
+
   def new
     @quote = Quote.new
     @group_id = params[:group_id]

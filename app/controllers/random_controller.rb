@@ -1,6 +1,4 @@
 class RandomController < ApplicationController
-  skip_before_action :authenticate_user!
-
   respond_to :json
 
   def get_praise
