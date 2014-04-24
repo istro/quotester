@@ -43,6 +43,11 @@ code {
     }
   }
 }
+.file-data table.lines.highlight {
+  background: #F8F8FF;
+  border: none;
+}
+
 .gist .gist-file .gist-data .line-data {
   padding: 0 !important;
   width: 100%;

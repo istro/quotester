@@ -10,7 +10,7 @@
 :markdown
   # Rails side.
   ## Dev environment
-  ### Dependencies
+  ### <a name='dependencies'></a>[Dependencies](#dependencies)
   ... are managed with [bundler](http://bundler.io/) - which means libraries we depend
   on are listed in `Gemfile`, and can be grouped as well:
 
@@ -26,7 +26,7 @@
   **Note: If you ever add dependencies, make sure you include changes to both
   `Gemfile` and `Gemfile.lock` in your commit.**
 
-  ### Database
+  ### <a name='database'></a>[Database](#database)
   Type and name of the db is described in `config/database.yml`, e.g.
 
 %code(data-gist-id='11234209'
@@ -51,7 +51,7 @@
   **Note: If you create any migrations, make sure you include changes to `schema.rb` in your
   commit as well**
 
-  ### Local environment, debugging
+  ### <a name='debugging'></a>[Local environment, debugging](#debugging)
 
   Running `bundle exec rails server` will serve your app locally and tail the log.
   In production, you can tail the same log (with some more info) with `heroku logs --tail`.
@@ -60,8 +60,8 @@
 
   Another awesome debugging tool is Pry - learn about it in [these screencasts](http://pryrepl.org/screencasts.html)
 
-  ## Code organization
-  ### Routes: URL resolution
+  ## <a name='code_org'></a>[Code organization](#code_org)
+  ### <a name='routes'></a>[Routes: URL resolution](#routes)
   In Rails, url resolving is defined in a `/config/routes.rb` file.
   Below is landing route definition, which only serves one static page:
 
@@ -87,17 +87,16 @@
 :markdown
   To see all routes defined in the app, run `rake routes` in shell
 
-  ### Controllers: business logic
+  ### <a name='controllers'></a>[Controllers: business logic](#controllers)
 
   In rails, controllers are where all the interactions between db and the browser
   are handled. If the controller sets any class variables
   (starting with `@`) - they will be available in the view that's parsed and passed
-  to the browser (gist line 8). If there are any params in the request - they are available as
-  `params` hash in the controller method (gist line 10).
+  to the browser. If there are any params in the request - they are available as
+  `params` hash in the controller method.
 
-  In our case, as rails is only an api - so controllers are specified to respond to json requests
-  (gist line 4).
-  In the actions - tell it `render json @data_var` (gist line 14).
+  In our case, as rails is only an api - so controllers are specified to respond to json requests.
+  In the actions - tell it `render json @thing`.
 
 %code(data-gist-id='11234209'
       data-gist-hide-footer='true'
@@ -118,7 +117,21 @@
 
 :markdown
 
-  ### Models
+  ### <a name='serializers'></a>[API specific: Serializers](#serializers)
+
+  When you say `render json @thing`, Rails will look for a serializer in `app/serialzers`.
+  If it finds one, it will use it. In a serializer you control what gets sent in the response.
+  For example, you can limit what attributes of the object get sent, add additional
+  properties sent in from the controller, add things client might want to know of in
+  a way it expects (such as id's of it's belonging objects):
+
+%code(data-gist-id='11234209'
+      data-gist-hide-footer='true'
+      data-gist-file='serializer.rb')
+
+:markdown
+
+  ### <a name='models'></a>[Models](#models)
 
   Predictably, models layer deals with persistance of records. In models you define relationships,
   validations, and add properties if needed:
@@ -129,7 +142,7 @@
 
 :markdown
 
-  ### Authentication
+  ### <a name='auth'></a>[Authentication](#auth)
 
   We use token-based authentication, on creating a user (and in the future, when user logs in)
   we add their authorization_token to the headers:
