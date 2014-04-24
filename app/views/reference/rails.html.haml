@@ -1,0 +1,158 @@
+=content_for :head do
+  %script{type: 'text/javascript',
+          src: '//cdnjs.cloudflare.com/ajax/libs/gist-embed/1.7/gist-embed.min.js',
+          async: true}
+:css
+  .nav {
+    display: none;
+  }
+
+:markdown
+  # Rails side.
+  ## Dev environment
+  ### Dependencies
+  ... are managed with [bundler](http://bundler.io/) - which means libraries we depend
+  on are listed in `Gemfile`, and can be grouped as well:
+
+%code(data-gist-id='11234209'
+      data-gist-hide-footer='true'
+      data-gist-file='Gemfile')
+
+:markdown
+
+  To fetch dependencies, you would run `bundle install` (or just `bundle`). That gets the
+  relevant libraries and writes down their versions in `Gemfile.lock` file. *DON'T update
+  `Gemfile.lock` manually.*
+  **Note: If you ever add dependencies, make sure you include changes to both
+  `Gemfile` and `Gemfile.lock` in your commit.**
+
+  ### Database
+  Type and name of the db is described in `config/database.yml`, e.g.
+
+%code(data-gist-id='11234209'
+      data-gist-hide-footer='true'
+      data-gist-file='database.yml')
+
+:markdown
+
+  Database structure is described in `db/schema.rb` and managed with `migrations`
+  that live in `db/migrate`. *DON'T update `schema.rb` manually. Generate a migration.*
+  You can generate migrations explicitly, or sometimes are generated for you when you
+  generate a resource. [See docs](http://guides.rubyonrails.org/command_line.html#rails-generate) for more info.
+
+%code(data-gist-id='11234209'
+      data-gist-hide-footer='true'
+      data-gist-file='migration.rb')
+
+:markdown
+
+  When you have a migration - running `rake db:migrate` will update the database *and write
+  updates to `schema.rb`*.
+  **Note: If you create any migrations, make sure you include changes to `schema.rb` in your
+  commit as well**
+
+  ### Local environment, debugging
+
+  Running `bundle exec rails server` will serve your app locally and tail the log.
+  In production, you can tail the same log (with some more info) with `heroku logs --tail`.
+  If there is an error, you will also see it in your browser with quite a bit of help
+  from [better_errors](https://github.com/charliesome/better_errors).
+
+  Another awesome debugging tool is Pry - learn about it in [these screencasts](http://pryrepl.org/screencasts.html)
+
+  ## Code organization
+  ### Routes: URL resolution
+  In Rails, url resolving is defined in a `/config/routes.rb` file.
+  Below is landing route definition, which only serves one static page:
+
+%code(data-gist-id='11234209'
+      data-gist-hide-footer='true'
+      data-gist-file='routes.rb'
+      data-gist-line='1-6'
+      data-gist-highlight-line='4')
+
+:markdown
+  `landing#home` means `home` action (just a method) defined in `landing_controller`.
+
+  Routes that manage a record of some type can be defined as resources -
+  that will create CRUD and index route with a single line
+  (also an example of scoping the routes):
+
+%code(data-gist-id='11234209'
+      data-gist-hide-footer='true'
+      data-gist-file='routes.rb'
+      data-gist-line='6-13'
+      data-gist-highlight-line='9-11')
+
+:markdown
+  To see all routes defined in the app, run `rake routes` in shell
+
+  ### Controllers: business logic
+
+  In rails, controllers are where all the interactions between db and the browser
+  are handled. If the controller sets any class variables
+  (starting with `@`) - they will be available in the view that's parsed and passed
+  to the browser (gist line 8). If there are any params in the request - they are available as
+  `params` hash in the controller method (gist line 10).
+
+  In our case, as rails is only an api - so controllers are specified to respond to json requests
+  (gist line 4).
+  In the actions - tell it `render json @data_var` (gist line 14).
+
+%code(data-gist-id='11234209'
+      data-gist-hide-footer='true'
+      data-gist-file='rooms_controller.rb'
+      data-gist-line='1-17'
+      data-gist-highlight-line='4,8,10,14')
+
+:markdown
+
+  **Worth noting: On save, Ember expects the object to be returned to it (so it would know saved record's
+  id). Rails by default does not do that, so you need to tell it explicitly (see gist).**
+
+%code(data-gist-id='11234209'
+      data-gist-hide-footer='true'
+      data-gist-line='17-29'
+      data-gist-file='rooms_controller.rb'
+      data-gist-highlight-line='23')
+
+:markdown
+
+  ### Models
+
+  Predictably, models layer deals with persistance of records. In models you define relationships,
+  validations, and add properties if needed:
+
+%code(data-gist-id='11234209'
+      data-gist-hide-footer='true'
+      data-gist-file='user.rb')
+
+:markdown
+
+  ### Authentication
+
+  We use token-based authentication, on creating a user (and in the future, when user logs in)
+  we add their authorization_token to the headers:
+
+%code(data-gist-id='11234209'
+      data-gist-hide-footer='true'
+      data-gist-file='users_controller.rb')
+
+:markdown
+
+  One more note about controller hierarchy in Rails: all controllers inherit from ApplicationController, so that's the place to log users in based on token received:
+
+%code(data-gist-id='11234209'
+      data-gist-hide-footer='true'
+      data-gist-file='application_controller.rb')
+
+:markdown
+
+  Courtesy of [Devise](https://github.com/plataformatec/devise) we have some helper methods
+  available - for example `authenticate_user!` (which ensures there is a logged in user)
+  and `current_user` (which we can use to get relevant records).
+
+%code(data-gist-id='11234209'
+      data-gist-hide-footer='true'
+      data-gist-file='locations_controller.rb'
+      data-gist-highlight-line='3,7')

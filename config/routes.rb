@@ -13,7 +13,11 @@ Quotester::Application.routes.draw do
     get :group_random, controller: 'random'
   end
 
-  get 'ember-demo' => 'sandbox#ember'
+  scope '/reference' do
+    get '/' => 'reference#index'
+    get 'rails' => 'reference#rails'
+    get 'ember' => 'reference#ember'
+  end
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

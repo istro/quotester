@@ -1,8 +1,0 @@
-=content_for :head do
-  %script{type: 'text/javascript',
-          src: '//cdnjs.cloudflare.com/ajax/libs/gist-embed/1.7/gist-embed.min.js',
-          async: true}
-:markdown
-  ## Rails side.
-
-  In Rails, url resolving is defined in a `/config/routes.rb` file. Currently we also serve the landing page from rails - as a single page, it's defined [here](https://github.com/1bog/purelights/blob/master/config/routes.rb#L3) - and `landing#home` means `home` action (just a method) defined in `landing_controller`. You can see all routes by running `bundle exec rake routes` in shell.
