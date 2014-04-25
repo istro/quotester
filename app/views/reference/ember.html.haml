@@ -1,0 +1,455 @@
+=render 'partials/no_nav'
+=render 'partials/gist_embed'
+
+.reference
+  :markdown
+    # Ember overview
+    ## Dev environment
+    ### <a name='dependencies'></a>[Dependencies](#dependencies)
+    ... are managed with two tools - [Npm](https://www.npmjs.org/) and [Bower](http://bower.io/).
+    Npm is mostly used for dev tools, bower for front-end packages that our app needs.
+    From [this SO answer](http://stackoverflow.com/a/18652918/1592915) - *The biggest
+    difference is that npm does nested dependency tree, which doesn't work that well
+    on the front-end, while Bower requires a flat dependency tree.*
+
+  =image_tag 'trollicons/fae.png', class: 'right'
+  :markdown
+    Much like Bundler's Gemfile these tools also have files they reference - `package.json`
+    and `bower.json` (for npm and bower respectively). As they are simple json files - be
+    mindful of commas if adding dependencies.
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='package.js'
+        data-gist-highlight-line='7')
+
+  :markdown
+    Bower is itself an npm module, so when setting up your dev environment you would run `npm install`
+    first and `bower install` second. These commands will downloaded dependencies listed to
+     `node_modules` and `vendor` directories (which are not added to source control).
+
+    As a task runner we use [Grunt](http://gruntjs.com/). It is also installed by npm, so `grunt`
+    command should already be available to you. Tasks are described in `Gruntfile.js`.
+    Gruntfile has tasks that we intend to run ourselves - e.g. `grunt server`, but can reference
+    other tasks defined in it - such as `build:debug` -
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='Gruntfile.js'
+        data-gist-line='1-11'
+        data-gist-highlight-line='7')
+
+  :markdown
+    and also functions that are available courtesy of some npm module we installed, such as
+    [fancySprites](https://github.com/MajorBreakfast/grunt-fancy-sprites):
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='Gruntfile.js'
+        data-gist-line='13-19'
+        data-gist-highlight-line='17')
+
+  :markdown
+    Many npm packages have associated grunt tasks. Example - css [autoprefixer](https://github.com/nDmitry/grunt-autoprefixer)
+    (btw we should add that).
+
+    ## <a name='code_org'></a>[Code organization](#code_org)
+
+  =image_tag 'trollicons/win.png', class: 'right'
+
+  :markdown
+    ### ES6 Syntax: The future is NOW!
+
+    Courtesy of [ES6 Module Transpiler](https://github.com/square/es6-module-transpiler#supported-es6-module-syntax) that Ember uses we get to write code from the future. At least read **ES6 Module Syntax**.
+
+
+    ### <a name='router'></a>[Router.js: URL resolution](#router)
+    In Ember, url structure is defined in `app/router.js`.
+    Individual routes are defined so:
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='router.js'
+        data-gist-line='4')
+
+  =image_tag 'trollicons/pr.png', class: 'left'
+
+  :markdown
+    **If `path` is the same as your route name (as it is indeed above), it can be omitted.**
+
+    Namespacing in Ember is done by defining "resources". These are just routes that have
+    child routes. Unlike rails `resource` in `routes.rb` - you don't automatically get a
+    bunch of routes - only `ResourceNameRoute` and `ResourceNameIndexRoute` routes are created
+    when defining a resource by itself, everything else you need to define explicitly.
+    The following example would generate `LocationsRoute`, `LocationsIndexRoute` - and `LocationsNewRoute`:
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='router.js'
+        data-gist-line='6-8')
+
+  =image_tag 'trollicons/surprised3.png'
+  %p.inline
+    Unlike rails - you don't get to define a "root" route - it is always
+    %code application.index
+
+  :markdown
+    ### <a name='routes'></a>[Routes: App state](#routes)
+
+    In Ember, routes are responsible for setting up the app state (e.g. fetching the necessary data and rendering templates - much like Rails controller).
+
+    Unlike Rails controllers - there is a route hierarchy (note: it's not like class hierarchy though, as there is no inheritance).
+
+  =image_tag 'trollicons/dazed.png', class: 'right'
+
+  :markdown
+    In Ember, all named routes are descendants of `ApplicationRoute`. You can see a list of all routes and the hierarchy in Chrome web tools ember extension (see [debugging](#emb_ext) section for a screenshot).
+
+    When you go to a url, `ApplicationRoute` gets activated first and then all route classes
+    per hierarchy defined in `app/router.js`. Somewhat unintuitively, route definitions are
+    looked up in directory structure by name - everything in `routes/` directory is descendent
+    of ApplicationRoute - and what's defined in a resource in `router.js` is in a directory
+    of the same name.
+
+    So, a `router.js` file like this:
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='router.js')
+
+  :markdown
+    would generate the following routes:
+
+  =image_tag 'trollicons/wtf.png', class: 'right'
+  :markdown
+    | line | Name of the Route      | routeName         | defined in
+    | ---- | ---------------------- | ----------------- | -----------------------------
+    | 6    | `LandingRoute`         | `landing`         | `app/routes/landing.js`
+    | 6    | `LocationsRoute`       | `locations`       | `app/routes/locations.js`
+    | 6    | `LocationsIndexRoute`  | `locations.index` | `app/routes/locations/index.js`
+    | 7    | `LocationsNewRoute`    | `locations.new`   | `app/routes/locations/new.js`
+    | 10   | `LocationRoute`        | `location`        | `app/routes/location.js`
+    | 10   | `LocationIndexRoute`   | `location.index`  | `app/routes/location/index.js`
+
+    Looking at it the code from the file system - looks like files about the same resource
+    are scattered all over - `location.js` and `locations.js` directly in `app/routes/`, then
+    two folders for plural and singular form... However, looking from App's perspective - it does
+    make sense (sort of). Just a bit confusing for us hoomans at first. Which begs the question -
+    are we organizing code for the app or for ourselves? In any case - this is how Ember does it.
+
+    #### Hooks and Properties:
+
+    - As per [docs](http://emberjs.com/api/classes/Ember.Route.html), there are a number of
+    hooks that get triggered at different times, and a number of methods available to use.
+    - Data-related hooks - `beforeModel`, `model` and `afterModel` - will wait for promises to fulfill before the page loads.
+    - `actions` property on the route is a hash with functions that handle user interaction that
+    make changes to app data. Example:
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='route.js'
+        data-gist-line='23-29')
+
+  :markdown
+    *Note: reacting to user interactions that do not need to be persisted should be defined in [controllers](#controllers).*
+
+    - route has access its' ancestors' models with `modelFor('name_of_parent_route')` hook (see [docs](http://emberjs.com/api/classes/Ember.Route.html#method_modelFor))
+
+  =image_tag 'trollicons/pr.png', class: 'left'
+  :markdown
+    #### Notable conventional defaults:
+
+    (1) assumed `model` hook:
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='route.js'
+        data-gist-line='1-7'
+        data-gist-highlight-line='4-6')
+
+  :markdown
+    (2) assumed `renderTemplate` hook:
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='route.js'
+        data-gist-line='8-15'
+        data-gist-highlight-line='12-14')
+
+  :markdown
+    (3) assumed `setupController` action: It runs `model` function on the route if applicable and
+    proxies route's model's properties to the controller (more on that in [controllers](#controllers) section).
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='route.js'
+        data-gist-line='16-22'
+        data-gist-highlight-line='12-14')
+
+  :markdown
+    ### <a name='models'></a>[Models](#models): persistence
+
+  =image_tag 'trollicons/ok.png', class: 'right'
+  :markdown
+    Mostly mirror what's on the server. The relationships are also defined, and if `{async: true}`
+    is added - Ember will only fetch the id's of related resource (otherwise fetch all records).
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='model.js')
+
+  :markdown
+    ### Controllers, Views and Templates: Presentation
+    #### <a name='controllers'></a>[Controllers](#controllers)
+    Controllers in Ember only control the presentation - everything template needs to know to
+    render correctly.
+
+    To avoid touching the DOM explicitly, what is on your screen is mostly manipulated by
+    watching property values on controller. For example, with a controller like this:
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='controller.js')
+
+  :markdown
+    we would need to limit the edit form in the template with a condition for `ifEditingUserName`.
+    "Edit" button could call `showEditUserName` action, and template would redraw accordingly, e.g.
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-line='1-8'
+        data-gist-file='template.hbs')
+
+  :markdown
+    **Bubbling: actions from a Controller can be bubbled up to Route if you `return true` in the end
+    of the action.** See example in the `save` action above.
+
+  =image_tag 'trollicons/heh.png', class: 'left'
+  :markdown
+    *For starters you can put all actions in the route, and then
+    move what's only relevant to presentation into controller later (or even move parts of the
+    functionality - and let the same action be handled by controller first, and then allowed
+    to bubble up to be handled by the same-named action in.*
+
+
+    **Controllers can be standalone** to provide functionality for some specific element, e.g.
+    generate sprites for avatars given this custom controller:
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='avatar-controller.js')
+
+  :markdown
+    we can make use of it like this in a template:
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-line='9-13'
+        data-gist-file='template.hbs')
+
+  :markdown
+    #### <a name='views'></a>[Views](#views)
+    Views in Ember are mostly used to handle user events. Each view is represented by a single
+    DOM element on page - div by default, but you can also change the tag, add classes and more
+    (see [guide](http://emberjs.com/guides/views/customizing-a-views-element/) for an overview).
+
+    They also have hooks for handling user events - such as `click` or `mouseEnter` - and also
+    for handling app state changes - such as `didInsertElement` or `parentViewDidChange` - see
+    the [docs](http://emberjs.com/api/classes/Ember.View.html#toc_responding-to-browser-events)
+    for full details.
+
+    #### <a name='templates'>[Templates](#templates)
+
+    Ember uses [handlebars](handlebarsjs.com) as it's default templating language. Code is
+    embedded with double curlies - `<html> {{ codez }} <moar html>`. In the previous section
+    there were gists with syntax examples.
+
+    **Template has access to all properties of it's respective Controller.**
+
+  =image_tag 'trollicons/yay.png', class: 'right'
+
+  :markdown
+    Courtesy of Route's `setupController` automagic hook, it also has access to the respective
+    Route's model's properties. *Note: `setupController` does __not__ make `model` available
+    on the controller - just the properties. So, you would reference properties directly -
+    i.e. `{{name}}` instead of `{{model.name}}`*
+
+    Templates are rendered in the order of route hierarchy, and each next template is rendered
+    in it's parent's `{{outlet}}` (think of Rails `yield`). You can also have named outlets - e.g.
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-line='15-19'
+        data-gist-highlight-line='17'
+        data-gist-file='template.hbs')
+
+  :markdown
+    Now, given we override `renderTemplate` hook in route like this (note you need to preserve
+    default behavior too):
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='route.js'
+        data-gist-line='31-41'
+        data-gist-highlight-line='37-39')
+
+  :markdown
+    partial with some awesome content from file `app/templates/super-special-partial.hbs` will be
+    rendered in that outlet.
+
+  =image_tag 'trollicons/freddie.png'
+
+  :markdown
+    #### App setup.
+
+    if you need to do some setup - initializer is a place to do it, in app/app.js
+
+    ## Communication loop
+
+    ### <a name='moving_parts'></a>[Moving parts of an Ember app](#moving_parts)
+
+  =image_tag 'trollicons/wah.png', class: 'right'
+  :markdown
+    - App - the actual app that deals with presentation/interacting with user, and has a few parts itself
+    - Store - deals with handling data for the App
+    - Adapter - deals with fetching data for the Store
+    - Serializer - deals with converting data to a conventional format that Store can consume
+
+    ### <a name='request_flow'></a>[Request flow](#request_flow)
+    0. User opens a page with data about/from `thing`.
+    1. App starts up (and depending on URL one or more Routes get activated) - and it asks
+    Store "yo, gimme `thing`!"
+    2. Store gives back an PromiseProxy, saying "np, here's your `thing`!".
+     *App can now do stuff with it - like insert into templates and such.
+    However, it's not the `thing` yet, if you check it's `isLoaded` property - you'll get
+    `false` and `status` property is `loading`. Any `thing`-specific properties will be
+    `undefined`, as the PromiseProxy proxies to an empty object until the promise is fulfilled.*
+    3. Next, Store looks for type specific adapter in `app/adapters` - if none found, uses application-adapter and tells it: "fetch me `thing`" - to which adapter gives back a Promise.
+    4. Adapter produces requested data (from a fixture, or by making a request to server -
+    depending on what type of adapter it is) - and looks for type-specific serialzier, if none
+    found - application serializer, if not - default serializer.
+    In serializer payload gets normalized into a `thing` that was initially requested (check out [docs](http://emberjs.com/api/data/classes/DS.RESTSerializer.html#method_normalize)).
+    5. Now the Promise that adapter gave Store is fulfilled - and so PromiseProxy that App has starts proxying to the actual `THING`.
+    8. Profit.
+
+    ### What it looks like in the code:
+    #### Asking Store for `thing`:
+
+  =image_tag 'trollicons/pr.png', class: 'left'
+  :markdown
+    Given we went to `root_url/user/4`, FooIndexRoute gets activated, and Ember will look in
+    `/app/routes/user/index.js` for it's definition. If it isn't defined, here's how App
+    asks Store by default:
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='route.js'
+        data-gist-line='1-6'
+        data-gist-highlight-line='5')
+
+  :markdown
+    #### Using a defined adapter:
+    For example, we want to load "Jedis" from server, but "Stormtroopers" from a fixture defined
+    in model itself. You would define Jedis model in `app/models/jedi.js`:
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='jedi.js')
+
+  :markdown
+    And Stormtroopers would have fixtures embedded:
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='storm-trooper-model.js')
+
+  :markdown
+    If in `app/adapters/` we only have one adapter - `application.js` defined like this -
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='application.js')
+
+  :markdown
+    Our app will try to get both kinds of warriors from the api. If we add a new file to
+    `app/adapters` and call it `storm-trooper.js` - Ember will try to use that instead:
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='storm-trooper-adapter.js')
+
+  :markdown
+    When Store looks for Stormtrooper specific adapter it will learn to use FixtureAdapter and
+    use the fixtures defined in model itself.
+
+  =image_tag 'trollicons/pr.png', class: 'left'
+  :markdown
+    #### Rendering a template by default:
+
+    If `renderTemplate` definition in the route file is omitted - Ember uses default behavior like this:
+
+  %code(class='gist-wrapper'
+        data-gist-id='11384151'
+        data-gist-hide-footer='true'
+        data-gist-file='route.js'
+        data-gist-line='8-14')
+
+  :markdown
+    ### <a name='debugging'></a>[Debugging](#debugging)
+
+  =image_tag 'trollicons/awman.png'
+  :markdown
+    #### Dev helpers
+    You can look at parts of Ember app in JS console by looking inside `window.App.__container__`,
+    e.g. Store is at `window.App.__container__.lookup('store:main')`.
+    To make it easier - `container`, `store`, `router` and `session` are already assigned to
+    respective variables in dev environment. They are defined in [app/helpers/dev.js](https://github.com/1bog/frontlights/blob/79d57e6dce041e3c0cf627995499d7c137c73c81/app/helpers/dev.js) -
+    and you can see how they are installed for dev environment in [config/environments/development.js](https://github.com/1bog/frontlights/blob/79d57e6dce041e3c0cf627995499d7c137c73c81/config/environments/development.js)
+
+    If you want to have them in production - doing the same thing as in above file accomplishes that:
+    running `window.ENV.install_dev_hooks = true` in dev tools JS console will do the trick.
+
+    #### All registered modules
+    i.e. everything that was exported properly and Ember has picked up - can be seen with `Em.keys(require.entries)`.
+    You can also grep them with `.grep(/filter/)` (grep was added in `helpers/dev.js` linked above).
+
+  =image_tag 'trollicons/hardcore.png', class: 'right'
+  :markdown
+    #### <a name='emb_ext'></a>[Chrome Dev tools Ember extension](#emb_ext)
+    [Go get it now](https://chrome.google.com/webstore/detail/ember-inspector/bmdblncegkenkacieihfhpjfppoconhi?hl=en) if you don't have it yet.
+
+    *In every tab in Chrome Dev Tools you can bring up the JS console with `Esc` (or if you like mice,
+    with the '>E' looking button - highlighted). In dev mode, ember does some extensive logging (enabled in `app/app.js`), so having the JS console visible is very handy. [Moar CDT tips](https://developers.google.com/chrome-developer-tools/docs/shortcuts).*
+
+    Most useful tab is "Routes". It shows all routes, and active ones are bold
+    (<span class='green'>green arrows</span> in screenshot).
+
+    Somewhat unobtrusive and unexplained *"<span class='bold blue'>></span>$E"* button
+    assignes the respective element to a `$E` variable in the console for you to inspect.
+
+    Good tab to not forget about is 'Promises' - if something "just doesn't work" and it's not
+    evident why - there may be an unfulfilled promise to blame, and that tab will shed light on it.
+
+  =image_tag 'ember-inspector.png'

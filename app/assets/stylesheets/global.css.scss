@@ -32,26 +32,3 @@ li {
 #user_nav {
   float: right;
 }
-
-// gist plugin overrides
-code {
-  font-weight: normal;
-  table {
-    margin-bottom: 0;
-    .line {
-      padding-left: 10px;
-    }
-  }
-}
-.file-data table.lines.highlight {
-  background: #F8F8FF;
-  border: none;
-}
-
-.gist .gist-file .gist-data .line-data {
-  padding: 0 !important;
-  width: 100%;
-}
-.gist .gist-file .gist-data .line-numbers {
-  padding: 0.25em 0.5em;
-}

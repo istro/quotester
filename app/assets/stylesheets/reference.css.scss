@@ -1,0 +1,62 @@
+// gist plugin overrides
+code {
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  color: inherit;
+  font-size: 90%;
+  font-weight: normal;
+  padding: 3px;
+  &.gist-wrapper {
+    padding: 0;
+    background-color: none;
+    border: none;
+  }
+  table {
+    margin-bottom: 0;
+    .line {
+      padding-left: 10px;
+    }
+  }
+}
+.file-data table.lines.highlight {
+  background: #F8F8FF;
+  border: none;
+}
+
+.gist .gist-file .gist-data .line-data {
+  padding: 0 !important;
+  width: 100%;
+}
+.gist .gist-file .gist-data .line-numbers {
+  padding: 0.25em 0.5em;
+}
+
+.reference {
+  li {
+    font-size: inherit;
+    line-height: inherit;
+    list-style: inherit;
+  }
+  img.left {
+    margin-right: 10px;
+  }
+  .inline {
+    display: inline;
+  }
+  .bold {
+    font-weight: 900;
+  }
+  .blue {
+    color: #0095D1;
+  }
+  .green {
+    color: #00E700;
+  }
+  &:after, &:before {
+    content: ' ';
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+}
