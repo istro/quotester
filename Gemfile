@@ -18,6 +18,7 @@ gem 'haml-rails'
 gem 'sass-rails', '~> 4.0.0'
 gem 'foundation-rails'
 gem 'redcarpet'
+gem 'pygments.rb'
 
 # monitoring (actually to ping heroku and prevent it from idling)
 gem 'newrelic_rpm'

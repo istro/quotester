@@ -1,4 +1,5 @@
 class ReferenceController < ApplicationController
+  layout "reference"
 
   def index
   end

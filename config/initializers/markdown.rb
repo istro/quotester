@@ -1,3 +1,5 @@
+require 'pygments'
+
 module Haml::Filters
 
   remove_filter("Markdown") #remove the existing Markdown filter
@@ -12,18 +14,20 @@ module Haml::Filters
 
     private
 
+    class HTMLwithPygments < Redcarpet::Render::HTML
+      def block_code(code, language)
+        Pygments.highlight(code, lexer: language)
+      end
+    end
+
     def markdown
-      @markdown ||= Redcarpet::Markdown.new Redcarpet::Render::HTML, {
-        autolink:         true,
-        fenced_code:      true,
-        generate_toc:     true,
-        gh_blockcode:     true,
-        hard_wrap:        true,
-        no_intraemphasis: true,
+      @markdown = Redcarpet::Markdown.new(HTMLwithPygments, {
+        autolink:             true,
+        fenced_code_blocks:   true,
+        no_intra_emphasis:    true,
         strikethrough:    true,
-        tables:           true,
-        xhtml:            true
-      }
+        tables:           true
+      })
     end
   end
 
