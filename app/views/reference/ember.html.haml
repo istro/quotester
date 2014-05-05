@@ -9,8 +9,8 @@
     difference is that npm does nested dependency tree, which doesn't work that well
     on the front-end, while Bower requires a flat dependency tree.*
 
-    <img class='right' src='/assets/trollicons/fae.png'>
-
+  =image_tag 'trollicons/fae.png', class: 'right'
+  :markdown
     Much like Bundler's Gemfile these tools also have files they reference - `package.json`
     and `bower.json` (for npm and bower respectively). As they are simple json files - be
     mindful of commas if adding dependencies.
@@ -72,8 +72,8 @@
 
     ### <a name='moving_parts'></a>[Moving parts of an Ember app](#moving_parts)
 
-    <img class='right' src='/assets/trollicons/wah.png'>
-
+  =image_tag 'trollicons/wah.png', class: 'right'
+  :markdown
     - App - the actual app that deals with presentation/interacting with user, and has a few parts itself
     - Store - deals with handling data for the App
     - Adapter - deals with fetching data for the Store
@@ -99,8 +99,8 @@
     ### What it looks like in the code:
     #### Asking Store for `thing`:
 
-    <img class='left' src='/assets/trollicons/pr.png'>
-
+  =image_tag 'trollicons/pr.png', class: 'left'
+  :markdown
     Given we went to `root_url/user/4`, FooIndexRoute gets activated, and Ember will look in
     `/app/routes/user/index.js` for it's definition. If it isn't defined, here's how App
     asks Store by default:
@@ -170,8 +170,8 @@
     When Store looks for Stormtrooper specific adapter it will learn to use FixtureAdapter and
     use the fixtures defined in model itself.
 
-    <img class='left' src='/assets/trollicons/pr.png'>
-
+  =image_tag 'trollicons/pr.png', class: 'left'
+  :markdown
     #### Rendering a template by default:
 
     If `renderTemplate` definition in the route file is omitted - Ember uses default behavior like this:
@@ -188,8 +188,8 @@
 
     ## <a name='code_org'></a>[Code organization](#code_org)
 
-    <img class='right' src='/assets/trollicons/win.png'>
-
+  =image_tag 'trollicons/win.png', class: 'right'
+  :markdown
     ### ES6 Syntax: The future is NOW!
 
     Courtesy of [ES6 Module Transpiler](https://github.com/square/es6-module-transpiler#supported-es6-module-syntax) that Ember uses we get to write code from the future. At least read **ES6 Module Syntax**.
@@ -206,8 +206,9 @@
     ``` javascript
     this.route('landing', { path: '/landing' });
     ```
-    <img class='left' src='/assets/trollicons/pr.png'>
 
+  =image_tag 'trollicons/pr.png', class: 'left'
+  :markdown
     **If `path` is the same as your route name (as it is indeed above), it can be omitted.**
 
     Namespacing in Ember is done by defining "resources". These are just routes that have
@@ -222,7 +223,8 @@
     });
     ```
 
-    <img src='/assets/trollicons/surprised3.png'>
+  =image_tag 'trollicons/surprised3.png'
+  :markdown
     Unlike rails - you don't get to define a "root" route - it is always `application.index`
 
     ### <a name='routes'></a>[Routes: App state](#routes)
@@ -231,8 +233,8 @@
 
     Unlike Rails controllers - there is a route hierarchy (note: it's not like class hierarchy though, as there is no inheritance).
 
-    <img class='right' src='/assets/trollicons/dazed.png'>
-
+  =image_tag 'trollicons/dazed.png', class: 'right'
+  :markdown
     In Ember, all named routes are descendants of `ApplicationRoute`. You can see a list of all routes and the hierarchy in Chrome web tools ember extension (see [debugging](#emb_ext) section for a screenshot).
 
     When you go to a url, `ApplicationRoute` gets activated first and then all route classes
@@ -260,8 +262,8 @@
 
     would generate the following routes:
 
-    <img class='right' src='/assets/trollicons/wtf.png'>
-
+  =image_tag 'trollicons/wtf.png', class: 'right'
+  :markdown
     | line | Name of the Route      | routeName         | defined in
     | ---- | ---------------------- | ----------------- | -----------------------------
     | 4    | `LocationsRoute`       | `locations`       | `app/routes/locations.js`
@@ -300,8 +302,8 @@
 
     - route has access its' ancestors' models with `modelFor('name_of_parent_route')` hook (see [docs](http://emberjs.com/api/classes/Ember.Route.html#method_modelFor))
 
-    <img class='left' src='/assets/trollicons/pr.png'>
-
+  =image_tag 'trollicons/pr.png', class: 'left'
+  :markdown
     #### Notable conventional defaults:
 
     (1) assumed `model` hook:
@@ -340,8 +342,8 @@
 
     ### <a name='models'></a>[Models](#models): persistence
 
-    <img class='right' src='/assets/trollicons/ok.png'>
-
+  =image_tag 'trollicons/ok.png', class: 'right'
+  :markdown
     Mostly mirror what's on the server. The relationships are also defined, and if `{async: true}`
     is added - Ember will only fetch the id's of related resource (otherwise fetch all records).
 
@@ -399,8 +401,8 @@
     **Bubbling: actions from a Controller can be bubbled up to Route if you `return true` in the end
     of the action.** See example in the `save` action above.
 
-    <img class='left' src='/assets/trollicons/heh.png'>
-
+  =image_tag 'trollicons/heh.png', class: 'left'
+  :markdown
     *For starters you can put all actions in the route, and then
     move what's only relevant to presentation into controller later (or even move parts of the
     functionality - and let the same action be handled by controller first, and then allowed
@@ -447,8 +449,8 @@
 
     **Template has access to all properties of it's respective Controller.**
 
-    <img class='right' src='/assets/trollicons/yay.png'>
-
+  =image_tag 'trollicons/yay.png', class: 'right'
+  :markdown
     Courtesy of Route's `setupController` automagic hook, it also has access to the respective
     Route's model's properties. *Note: `setupController` does __not__ make `model` available
     on the controller - just the properties. So, you would reference properties directly -
@@ -485,12 +487,12 @@
     partial with some awesome content from file `app/templates/super-special-partial.hbs` will be
     rendered in that outlet.
 
-    <img src='/assets/trollicons/freddie.png'>
-
+  =image_tag 'trollicons/freddie.png'
+  :markdown
     ### <a name='debugging'></a>[Debugging](#debugging)
 
-    <img src='/assets/trollicons/awman.png'>
-
+  =image_tag 'trollicons/awman.png'
+  :markdown
     #### Dev helpers
     You can look at parts of Ember app in JS console by looking inside `window.App.__container__`,
     e.g. Store is at `window.App.__container__.lookup('store:main')`.
@@ -505,8 +507,8 @@
     i.e. everything that was exported properly and Ember has picked up - can be seen with `Em.keys(require.entries)`.
     You can also grep them with `.grep(/filter/)` (grep was added in `helpers/dev.js` linked above).
 
-    <img class='right' src='/assets/trollicons/hardcore.png'>
-
+  =image_tag 'trollicons/hardcore.png', class: 'right'
+  :markdown
     #### <a name='emb_ext'></a>[Chrome Dev tools Ember extension](#emb_ext)
     [Go get it now](https://chrome.google.com/webstore/detail/ember-inspector/bmdblncegkenkacieihfhpjfppoconhi?hl=en) if you don't have it yet.
 
@@ -522,4 +524,4 @@
     Good tab to not forget about is 'Promises' - if something "just doesn't work" and it's not
     evident why - there may be an unfulfilled promise to blame, and that tab will shed light on it.
 
-    <img src='/assets/ember-inspector.png'>
+  =image_tag 'ember-inspector.png'
