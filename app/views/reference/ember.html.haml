@@ -68,6 +68,124 @@
     Many npm packages have associated grunt tasks. Example - css [autoprefixer](https://github.com/nDmitry/grunt-autoprefixer)
     (btw we should add that).
 
+    ## Communication loop
+
+    ### <a name='moving_parts'></a>[Moving parts of an Ember app](#moving_parts)
+
+    <img class='right' src='/assets/trollicons/wah.png'>
+
+    - App - the actual app that deals with presentation/interacting with user, and has a few parts itself
+    - Store - deals with handling data for the App
+    - Adapter - deals with fetching data for the Store
+    - Serializer - deals with converting data to a conventional format that Store can consume
+
+    ### <a name='request_flow'></a>[Request flow](#request_flow)
+    0. User opens a page with data about/from `thing` - `site.com/thing/4`.
+    1. App starts up (and depending on URL one or more Routes get activated) - and it asks
+    Store "yo, gimme `thing`!"
+    2. Store gives back an PromiseProxy, saying "np, here's your `thing`!".
+     *App can now do stuff with it - like insert into templates and such.
+    However, it's not the `thing` yet, if you check it's `isLoaded` property - you'll get
+    `false` and `status` property is `loading`. Any `thing`-specific properties will be
+    `undefined`, as the PromiseProxy proxies to an empty object until the promise is fulfilled.*
+    3. Next, Store looks for type specific adapter in `app/adapters` - if none found, uses application-adapter and tells it: "fetch me `thing`" - to which adapter gives back a Promise.
+    4. Adapter produces requested data (from a fixture, or by making a request to server -
+    depending on what type of adapter it is) - and looks for type-specific serialzier, if none
+    found - application serializer, if not - default serializer.
+    In serializer payload gets normalized into a `thing` that was initially requested (check out [docs](http://emberjs.com/api/data/classes/DS.RESTSerializer.html#method_normalize)).
+    5. Now the Promise that adapter gave Store is fulfilled - and so PromiseProxy that App has starts proxying to the actual `THING`.
+    8. Profit.
+
+    ### What it looks like in the code:
+    #### Asking Store for `thing`:
+
+    <img class='left' src='/assets/trollicons/pr.png'>
+
+    Given we went to `root_url/user/4`, FooIndexRoute gets activated, and Ember will look in
+    `/app/routes/user/index.js` for it's definition. If it isn't defined, here's how App
+    asks Store by default:
+
+    ``` javascript
+    // /app/routes/user/index.js
+    export default Ember.Route.extend({
+      // this is default model behaviour - that's what Ember assumes when model definition is omitted
+      model: function (params) {
+        return this.store.find('user', params.user_id)
+      }
+    ```
+
+    #### Using a defined adapter:
+    For example, we want to load "Jedis" from server, but "Stormtroopers" from a fixture defined
+    in model itself. You would define Jedis model in `app/models/jedi.js`:
+
+    ``` javascript
+    // app/models/jedi.js
+    export default DS.Model.extend({
+      weapon: DS.attr()
+    });
+    ```
+
+    And Stormtroopers would have fixtures embedded:
+
+    ``` javascript
+    // app/models/strorm-trooper.js
+    var StormTrooper = DS.Model.extend({
+      weapon: DS.attr()
+    });
+
+    StormTrooper.reopenClass({
+      FIXTURES: [{
+        id: 1,
+        weapon: "Blaster rifle",
+      }, {
+        id: 2,
+        name: "Samurai sword",
+      }, {
+        id: 3,
+        name: "Baton",
+      }]
+    });
+
+    export default StormTrooper;
+    ```
+
+    If in `app/adapters/` we only have one adapter - `application.js` defined like this -
+
+    ``` javascript
+    // /app/adapters/application.js
+    export default DS.ActiveModelAdapter.extend({
+      host: 'trooper-json-api-host.com/',
+      namespace: 'api'
+    });
+    ```
+
+    Our app will try to get both kinds of warriors from the api. If we add a new file to
+    `app/adapters` and call it `storm-trooper.js` - Ember will try to use that instead:
+
+    ``` javascript
+    // /app/adapters/storm-trooper.js
+    export default DS.FixtureAdapter;
+    ```
+
+    When Store looks for Stormtrooper specific adapter it will learn to use FixtureAdapter and
+    use the fixtures defined in model itself.
+
+    <img class='left' src='/assets/trollicons/pr.png'>
+
+    #### Rendering a template by default:
+
+    If `renderTemplate` definition in the route file is omitted - Ember uses default behavior like this:
+
+    ``` javascript
+    // /app/routes/user/index.js
+      ...
+      // default renderTemplate behaviour - that's what Ember assumes if it's omitted
+      // the path given is relative to app/templates/
+      renderTemplate: function () {
+        this.render('user/index')
+      }
+    ```
+
     ## <a name='code_org'></a>[Code organization](#code_org)
 
     <img class='right' src='/assets/trollicons/win.png'>
@@ -76,6 +194,10 @@
 
     Courtesy of [ES6 Module Transpiler](https://github.com/square/es6-module-transpiler#supported-es6-module-syntax) that Ember uses we get to write code from the future. At least read **ES6 Module Syntax**.
 
+    ### App setup.
+
+    Ember app is initialized by running the code in `app/app.js`. Initial configuration and
+    other setup is done in initializers in that file.
 
     ### <a name='router'></a>[Router.js: URL resolution](#router)
     In Ember, url structure is defined in `app/router.js`.
@@ -205,7 +327,7 @@
     ```
 
     (3) assumed `setupController` action: It runs `model` function on the route if applicable and
-    proxies route's model's properties to the controller (more on that in [controllers](#controllers) section).
+    proxies route's model's properties to the controller (more on that in [templates](#templates) section).
 
     ``` javascript
     // /app/routes/user/index.js
@@ -307,9 +429,10 @@
     ```
 
     #### <a name='views'></a>[Views](#views)
-    Views in Ember are mostly used to handle user events. Each view is represented by a single
-    DOM element on page - div by default, but you can also change the tag, add classes and more
-    (see [guide](http://emberjs.com/guides/views/customizing-a-views-element/) for an overview).
+    Views in Ember are the JS file that's directly tied to the DOM element the template gets
+    rendered into. Each view is represented by a single DOM element on page - div by default,
+    but you can also change the tag, add classes and more (see
+    [guide](http://emberjs.com/guides/views/customizing-a-views-element/) for an overview).
 
     They also have hooks for handling user events - such as `click` or `mouseEnter` - and also
     for handling app state changes - such as `didInsertElement` or `parentViewDidChange` - see
@@ -363,128 +486,6 @@
     rendered in that outlet.
 
     <img src='/assets/trollicons/freddie.png'>
-
-    #### App setup.
-
-    if you need to do some setup - initializer is a place to do it, in app/app.js
-
-    ## Communication loop
-
-    ### <a name='moving_parts'></a>[Moving parts of an Ember app](#moving_parts)
-
-    <img class='right' src='/assets/trollicons/wah.png'>
-
-    - App - the actual app that deals with presentation/interacting with user, and has a few parts itself
-    - Store - deals with handling data for the App
-    - Adapter - deals with fetching data for the Store
-    - Serializer - deals with converting data to a conventional format that Store can consume
-
-    ### <a name='request_flow'></a>[Request flow](#request_flow)
-    0. User opens a page with data about/from `thing`.
-    1. App starts up (and depending on URL one or more Routes get activated) - and it asks
-    Store "yo, gimme `thing`!"
-    2. Store gives back an PromiseProxy, saying "np, here's your `thing`!".
-     *App can now do stuff with it - like insert into templates and such.
-    However, it's not the `thing` yet, if you check it's `isLoaded` property - you'll get
-    `false` and `status` property is `loading`. Any `thing`-specific properties will be
-    `undefined`, as the PromiseProxy proxies to an empty object until the promise is fulfilled.*
-    3. Next, Store looks for type specific adapter in `app/adapters` - if none found, uses application-adapter and tells it: "fetch me `thing`" - to which adapter gives back a Promise.
-    4. Adapter produces requested data (from a fixture, or by making a request to server -
-    depending on what type of adapter it is) - and looks for type-specific serialzier, if none
-    found - application serializer, if not - default serializer.
-    In serializer payload gets normalized into a `thing` that was initially requested (check out [docs](http://emberjs.com/api/data/classes/DS.RESTSerializer.html#method_normalize)).
-    5. Now the Promise that adapter gave Store is fulfilled - and so PromiseProxy that App has starts proxying to the actual `THING`.
-    8. Profit.
-
-    ### What it looks like in the code:
-    #### Asking Store for `thing`:
-
-    <img class='left' src='/assets/trollicons/pr.png'>
-
-    Given we went to `root_url/user/4`, FooIndexRoute gets activated, and Ember will look in
-    `/app/routes/user/index.js` for it's definition. If it isn't defined, here's how App
-    asks Store by default:
-
-    ``` javascript
-    // /app/routes/user/index.js
-    export default Ember.Route.extend({
-      // this is default model behaviour - that's what Ember assumes when model definition is omitted
-      model: function (params) {
-        return this.store.find('user', params.user_id)
-      }
-    ```
-
-    #### Using a defined adapter:
-    For example, we want to load "Jedis" from server, but "Stormtroopers" from a fixture defined
-    in model itself. You would define Jedis model in `app/models/jedi.js`:
-
-    ``` javascript
-    // app/models/jedi.js
-    export default DS.Model.extend({
-      weapon: DS.attr()
-    });
-    ```
-
-    And Stormtroopers would have fixtures embedded:
-
-    ``` javascript
-    // app/models/strorm-trooper.js
-    var StormTrooper = DS.Model.extend({
-      weapon: DS.attr()
-    });
-
-    StormTrooper.reopenClass({
-      FIXTURES: [{
-        id: 1,
-        weapon: "Blaster rifle",
-      }, {
-        id: 2,
-        name: "Samurai sword",
-      }, {
-        id: 3,
-        name: "Baton",
-      }]
-    });
-
-    export default StormTrooper;
-    ```
-
-    If in `app/adapters/` we only have one adapter - `application.js` defined like this -
-
-    ``` javascript
-    // /app/adapters/application.js
-    export default DS.ActiveModelAdapter.extend({
-      host: 'trooper-json-api-host.com/',
-      namespace: 'api'
-    });
-    ```
-
-    Our app will try to get both kinds of warriors from the api. If we add a new file to
-    `app/adapters` and call it `storm-trooper.js` - Ember will try to use that instead:
-
-    ``` javascript
-    // /app/adapters/storm-trooper.js
-    export default DS.FixtureAdapter;
-    ```
-
-    When Store looks for Stormtrooper specific adapter it will learn to use FixtureAdapter and
-    use the fixtures defined in model itself.
-
-    <img class='left' src='/assets/trollicons/pr.png'>
-
-    #### Rendering a template by default:
-
-    If `renderTemplate` definition in the route file is omitted - Ember uses default behavior like this:
-
-    ``` javascript
-    // /app/routes/user/index.js
-      ...
-      // default renderTemplate behaviour - that's what Ember assumes if it's omitted
-      // the path given is relative to app/templates/
-      renderTemplate: function () {
-        this.render('user/index')
-      }
-    ```
 
     ### <a name='debugging'></a>[Debugging](#debugging)
 
