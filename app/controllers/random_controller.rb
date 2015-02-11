@@ -4,7 +4,7 @@ class RandomController < ApplicationController
   def get_praise
     # costumize for specific users.
     # todo: bring that out into UI
-    if params[:name].casecmp('marekjanicki') == 0
+    if params[:name].downcase.include? 'marek' && 'janicki'
       params[:group_name] = 'stern'
       group_random
     else
